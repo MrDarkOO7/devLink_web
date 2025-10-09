@@ -5,9 +5,11 @@ import Footer from "./Footer";
 
 const Body = () => {
   return (
-    <div>
+    <div className="min-h-screen flex flex-col bg-base-200">
       <Navbar />
-      <Outlet />
+      <main className="flex-grow">
+        <Outlet />
+      </main>
       <Footer />
     </div>
   );
