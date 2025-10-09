@@ -54,9 +54,9 @@ const Login = () => {
       setMessage(msg);
       dispatch(addUser(user));
       // Redirect if using react-router
-      // if (navigate) {
-      //   navigate("/dashboard");
-      // }
+      if (navigate) {
+        navigate("/");
+      }
     } catch (err) {
       console.error("Login error:", err);
 
@@ -214,7 +214,7 @@ const Login = () => {
 
           <p className="text-center text-sm text-base-content/70">
             Don’t have an account?{" "}
-            <a href="#" className="link link-primary">
+            <a href="/signup" className="link link-primary">
               Sign up
             </a>
           </p>
