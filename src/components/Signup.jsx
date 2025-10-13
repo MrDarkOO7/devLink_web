@@ -74,7 +74,7 @@ const Signup = () => {
         password: form.password,
       };
 
-      const res = await api.post("/signup", payload);
+      const res = await api.post("/auth/signup", payload);
 
       // server returns { message: "User signed up successfully" }
       const successMsg =
@@ -92,9 +92,9 @@ const Signup = () => {
       setFieldErrors({});
 
       // Redirect to login after 1s so user sees message (optional)
-      if (navigate) {
-        setTimeout(() => navigate("/login"), 1000);
-      }
+      // if (navigate) {
+      //   setTimeout(() => navigate("/login"), 1000);
+      // }
     } catch (err) {
       console.error("Signup error:", err);
 
