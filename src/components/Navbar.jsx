@@ -14,9 +14,9 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const userData = useSelector((store) => store.user);
-  const ProfilePhoto = userData.photoUrl
-    ? userData.photoUrl
-    : userData.gender === "female"
+  const ProfilePhoto = userData?.photoUrl
+    ? userData?.photoUrl
+    : userData?.gender === "female"
     ? defaultProfile.female
     : defaultProfile.male;
   const [loading, setLoading] = useState(true);
@@ -103,7 +103,10 @@ const Navbar = () => {
                 </Link>
               </li>
               <li>
-                <a>Settings</a>
+                <Link to={"/connections"}>Connections</Link>
+              </li>
+              <li>
+                <Link to={"/requests"}>Connection Requests</Link>
               </li>
               <li>
                 <a onClick={handleLogout}>Logout</a>
