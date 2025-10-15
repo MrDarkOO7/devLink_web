@@ -1,29 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import api from "../utils/api";
 import { addUser, removeUser } from "../redux/userSlice";
 import { useNavigate } from "react-router-dom";
 import { defaultProfile } from "../utils/environment";
 
-const DEFAULT_AVATAR_MALE = defaultProfile?.male;
+const DEFAULT_AVATAR_MALE =
+  defaultProfile?.male ||
+  "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+const DEFAULT_AVATAR_FEMALE =
+  defaultProfile?.female ||
+  "https://cdn-icons-png.flaticon.com/512/4140/4140048.png";
 
-const DEFAULT_AVATAR_FEMALE = defaultProfile?.female;
-
-const Profile = () => {
-  const userData = useSelector((store) => store.user?.data || store.user);
+const ProfileEditor = ({ initialUser }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // view / edit toggle
-  const [isEditing, setIsEditing] = useState(false);
 
-  // form state
+  const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
     age: "",
     gender: "",
     bio: "",
-    skills: [], // array of strings
+    skills: [],
     photoUrl: "",
   });
 
@@ -32,33 +32,30 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
 
-  // initialize form from redux user when component mounts or userData changes
   useEffect(() => {
-    if (userData) {
+    if (initialUser) {
       setForm({
-        firstName: userData.firstName || "",
-        lastName: userData.lastName || "",
-        age: userData.age ?? "",
-        gender: userData.gender || "",
-        bio: userData.bio || "",
-        skills: Array.isArray(userData.skills)
-          ? userData.skills
-          : userData.skills
-          ? userData.skills.split(",").map((s) => s.trim())
+        firstName: initialUser.firstName || "",
+        lastName: initialUser.lastName || "",
+        age: initialUser.age ?? "",
+        gender: initialUser.gender || "",
+        bio: initialUser.bio || "",
+        skills: Array.isArray(initialUser.skills)
+          ? initialUser.skills
+          : initialUser.skills
+          ? initialUser.skills.split(",").map((s) => s.trim())
           : [],
-        photoUrl: userData.photoUrl || "",
+        photoUrl: initialUser.photoUrl || "",
       });
     }
-  }, [userData]);
+  }, [initialUser]);
 
-  // helper: choose avatar by gender if no photoUrl
   const displayAvatar =
     form.photoUrl ||
     (form.gender?.toLowerCase() === "female"
       ? DEFAULT_AVATAR_FEMALE
       : DEFAULT_AVATAR_MALE);
 
-  // local validation (mirrors validateEditProfileData on server)
   const validate = (values) => {
     const errs = {};
     const { firstName, lastName, age, photoUrl, bio, skills } = values;
@@ -77,8 +74,6 @@ const Profile = () => {
     }
     if (photoUrl) {
       try {
-        // simple URL check
-        /* eslint-disable no-new */
         new URL(photoUrl);
       } catch {
         errs.photoUrl = "Photo URL is invalid";
@@ -101,7 +96,6 @@ const Profile = () => {
     setError(null);
   };
 
-  // skills input: add on Enter or comma
   const handleSkillKey = (e) => {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
@@ -139,7 +133,7 @@ const Profile = () => {
       return;
     }
 
-    // Build payload — only send allowed fields and only those changed vs original userData
+    // Build payload - only changed fields
     const payload = {};
     const allowed = [
       "firstName",
@@ -152,21 +146,17 @@ const Profile = () => {
     ];
     allowed.forEach((k) => {
       const newVal = form[k];
-      const origVal = userData
-        ? Array.isArray(userData[k])
-          ? userData[k]
-          : userData[k]
+      const origVal = initialUser
+        ? Array.isArray(initialUser[k])
+          ? initialUser[k]
+          : initialUser[k]
         : undefined;
-
-      // treat empty string as undefined to avoid sending empty values unintentionally
       const normalizedNew = typeof newVal === "string" ? newVal.trim() : newVal;
-
       const changed =
         (Array.isArray(normalizedNew) &&
           JSON.stringify(normalizedNew) !== JSON.stringify(origVal)) ||
         (!Array.isArray(normalizedNew) &&
           String(normalizedNew) !== String(origVal));
-
       if (normalizedNew !== "" && changed) {
         payload[k] = normalizedNew;
       }
@@ -175,36 +165,30 @@ const Profile = () => {
     if (Object.keys(payload).length === 0) {
       setMessage("No changes to save.");
       setIsEditing(false);
-      setTimeout(() => {
-        setMessage(null);
-      }, 5000);
+      setTimeout(() => setMessage(null), 3000);
       return;
     }
 
     setLoading(true);
     try {
-      // PATCH /profile/edit
-      const res = await api.patch("/profile/edit", payload);
+      const res = await api.patch("/profile/edit", payload, {
+        withCredentials: true,
+      });
       const updatedUser = res?.data?.userData || res?.data;
-
       setMessage(res?.data?.message || "Profile updated");
-      setTimeout(() => {
-        setMessage(null);
-      }, 5000);
+      setTimeout(() => setMessage(null), 4000);
 
-      // ---- DISPATCH UPDATED USER TO REDUX STORE HERE ----
+      // dispatch updated user to redux
       dispatch(addUser(updatedUser));
-      // ---------------------------------------------------
 
-      // update form with saved values (ensure consistency)
+      // update local form and stop editing
       setForm((s) => ({
         ...s,
         ...Object.fromEntries(Object.entries(payload)),
       }));
-
       setIsEditing(false);
     } catch (err) {
-      if (err?.status === 401) {
+      if (err?.response?.status === 401) {
         dispatch(removeUser());
         navigate("/login");
       }
@@ -219,23 +203,13 @@ const Profile = () => {
     }
   };
 
-  if (!userData) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-center text-sm text-muted">
-          No user data available.
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-3xl mx-auto p-6">
       <div className="card bg-base-100 shadow-lg rounded-xl overflow-hidden">
         <div className="md:flex">
-          {/* Avatar column */}
+          {/* Avatar */}
           <div className="md:w-1/3 bg-base-200 flex items-center justify-center p-6">
-            <div className="w-36 h-36 rounded-full overflow-hidden ring-2 ring-offset-2 ring-base-100 shadow">
+            <div className="w-36 h-36 rounded-full overflow-hidden ring-2">
               <img
                 src={displayAvatar}
                 alt={`${form.firstName || "User"} avatar`}
@@ -244,19 +218,18 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Content column */}
           <div className="md:w-2/3 p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-semibold tracking-tight">
-                  {userData.firstName} {userData.lastName}
+                  {initialUser?.firstName} {initialUser?.lastName}
                 </h2>
                 <p className="text-sm text-base-content/60 mt-1">
-                  {userData.emailId}
+                  {initialUser?.emailId}
                 </p>
               </div>
 
-              <div className="flex items-start gap-2">
+              <div>
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm"
@@ -272,12 +245,11 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* VIEW MODE */}
             {!isEditing ? (
               <>
                 <div className="mt-4 text-base text-base-content/80 leading-relaxed">
-                  {userData.bio ? (
-                    userData.bio
+                  {initialUser?.bio ? (
+                    initialUser.bio
                   ) : (
                     <span className="text-sm text-base-content/60">
                       No bio added.
@@ -285,30 +257,32 @@ const Profile = () => {
                   )}
                 </div>
 
-                <div className="mt-5">
-                  <h4 className="text-sm font-medium text-base-content/70 mb-2">
-                    Skills
-                  </h4>
-                  {Array.isArray(userData.skills) &&
-                  userData.skills.length > 0 ? (
+                {Array.isArray(initialUser?.skills) &&
+                initialUser.skills.length > 0 ? (
+                  <div className="mt-5">
+                    <h4 className="text-sm font-medium text-base-content/70 mb-2">
+                      Skills
+                    </h4>
                     <div className="flex flex-wrap gap-2">
-                      {userData.skills.map((s, i) => (
-                        <span key={i} className="badge badge-outline text-sm">
+                      {initialUser.skills.map((s, i) => (
+                        <span
+                          key={i}
+                          className="badge badge-outline text-sm capitalize"
+                        >
                           {s}
                         </span>
                       ))}
                     </div>
-                  ) : (
-                    <div className="text-sm text-base-content/60">
-                      No skills listed.
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ) : null}
+                {/* <div className="text-sm text-base-content/60">
+                      No skills listed
+                    </div> */}
 
-                <div className="mt-5 flex gap-4 text-sm text-base-content/60">
-                  {userData.age ? <div>{userData.age} yrs</div> : null}
-                  {userData.gender ? (
-                    <div className="capitalize">{userData.gender}</div>
+                <div className="mt-4 text-sm text-base-content/60 flex gap-4">
+                  {initialUser?.age ? <div>{initialUser.age} yrs</div> : null}
+                  {initialUser?.gender ? (
+                    <div className="capitalize">{initialUser.gender}</div>
                   ) : null}
                 </div>
 
@@ -320,7 +294,7 @@ const Profile = () => {
                 )}
               </>
             ) : (
-              /* EDIT MODE */
+              /* EDIT FORM */
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
@@ -419,10 +393,8 @@ const Profile = () => {
                       {fieldErrors.photoUrl}
                     </p>
                   )}
-
-                  {/* small preview */}
                   <div className="mt-3 flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden ring-2 ring-base-100">
+                    <div className="w-12 h-12 rounded-full overflow-hidden ring-2">
                       <img
                         src={form.photoUrl || displayAvatar}
                         alt="preview"
@@ -531,4 +503,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfileEditor;

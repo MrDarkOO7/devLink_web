@@ -28,8 +28,10 @@ const Connections = () => {
   }, []);
 
   return (
-    <div className="w-full max-w-4xl mx-auto py-8 px-4">
-      <h2 className="text-lg font-semibold mb-4">Connections</h2>
+    <div className="flex flex-col justify-center w-full max-w-4xl mx-auto py-8 px-4">
+      <h2 className="flex justify-center text-xl font-semibold mb-8">
+        Connections
+      </h2>
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
@@ -40,11 +42,11 @@ const Connections = () => {
           {error}
         </div>
       ) : connections.length === 0 ? (
-        <div className="text-sm text-muted py-8 text-center">
+        <div className="text-sm text-base-content/60 py-8 text-center">
           You have no connections yet.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex flex-col w-full max-w-2xl justify-center space-y-4 mx-auto">
           {connections.map((c) => (
             <ConnectionCard key={c._id} user={c} />
           ))}
