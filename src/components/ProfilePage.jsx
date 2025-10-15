@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import api from "../utils/api";
 import ProfileView from "./ProfileView";
 import ProfileEditor from "./ProfileEditor";
+import { removeUser } from "../redux/userSlice";
 
 const ProfilePage = () => {
   const { id } = useParams();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const currentUser = useSelector((s) => s.user?.data || s.user);
 
@@ -59,6 +61,10 @@ const ProfilePage = () => {
         if (!mountedRef.current) return;
         setProfile(data);
       } catch (err) {
+        if (err.status === 401) {
+          dispatch(removeUser());
+          navigate("/login");
+        }
         if (err?.name === "CanceledError" || err?.name === "AbortError") return;
         console.error("Failed to fetch profile:", err);
         if (!mountedRef.current) return;

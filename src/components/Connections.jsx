@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
 import ConnectionCard from "./ConnectionCard";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { removeUser } from "../redux/userSlice";
 
 const Connections = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -17,6 +22,10 @@ const Connections = () => {
         const formatted = res?.data?.formattedConnections || [];
         setConnections(formatted);
       } catch (err) {
+        if (err.status === 401) {
+          dispatch(removeUser());
+          navigate("/login");
+        }
         console.error("Failed to fetch connections:", err);
         setError("Could not load connections. Please try again.");
       } finally {

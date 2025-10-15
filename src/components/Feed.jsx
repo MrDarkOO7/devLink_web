@@ -3,9 +3,12 @@ import api from "../utils/api";
 import { useDispatch, useSelector } from "react-redux";
 import { addFeed } from "../redux/feedSlice";
 import UserCard from "./UserCard";
+import { removeUser } from "../redux/userSlice";
+import { useNavigate } from "react-router-dom";
 
 const Feed = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const feedData = useSelector((store) => store.feed);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -20,6 +23,10 @@ const Feed = () => {
       console.log(res?.data?.suggestions);
       dispatch(addFeed(res?.data?.suggestions));
     } catch (err) {
+      if (err.status === 401) {
+        dispatch(removeUser());
+        navigate("/login");
+      }
       console.error("Failed to load feed:", err);
       setError("Could not load suggestions. Please try again.");
     } finally {
@@ -52,11 +59,8 @@ const Feed = () => {
           </div>
         )}
 
-        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full justify-items-center"> */}
         <div className="w-full justify-items-center">
           {Array.isArray(feedData) && <UserCard user={feedData[0]} />}
-          {/* feedData.map((user) => (
-          ))} */}
         </div>
       </div>
     </div>

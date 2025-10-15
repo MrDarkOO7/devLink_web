@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import api from "../utils/api"; // must have withCredentials: true
 import RequestCard from "./RequesrCard";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { removeUser } from "../redux/userSlice";
 
 /**
  * RequestsPage
@@ -14,6 +17,8 @@ import RequestCard from "./RequesrCard";
  */
 
 const RequestsPage = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -27,6 +32,10 @@ const RequestsPage = () => {
         const list = res?.data?.connectionRequests || [];
         setRequests(list);
       } catch (err) {
+        if (err.status === 401) {
+          dispatch(removeUser());
+          navigate("/login");
+        }
         console.err(err);
         setError("Failed to load requests. Please refresh.");
       } finally {

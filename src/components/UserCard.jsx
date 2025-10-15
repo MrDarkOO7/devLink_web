@@ -1,15 +1,5 @@
 import React from "react";
-
-/**
- * Pure presentational UserCard.
- * Expects a single `user` object. No APIs inside.
- *
- * user sample shape:
- * {
- *   _id, firstName, lastName, username, emailId,
- *   bio, avatar, mutualCount
- * }
- */
+import { defaultProfile } from "../utils/environment";
 
 const UserCard = ({ user }) => {
   if (!user) {
@@ -24,8 +14,8 @@ const UserCard = ({ user }) => {
   const displayAvatar =
     photoUrl ||
     (gender?.toLowerCase() === "female"
-      ? "https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
-      : "https://cdn-icons-png.flaticon.com/512/149/149071.png");
+      ? defaultProfile.female
+      : defaultProfile.male);
 
   return (
     user && (
@@ -66,24 +56,10 @@ const UserCard = ({ user }) => {
           )}
 
           <div className="card-actions justify-end mt-3">
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              onClick={() => {
-                // placeholder click — swap to router navigation if needed
-                // e.g., navigate(`/profile/${user._id}`);
-              }}
-            >
+            <button type="button" className="btn btn-primary btn-sm">
               Ignore
             </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => {
-                // placeholder click — swap to router navigation if needed
-                // e.g., navigate(`/profile/${user._id}`);
-              }}
-            >
+            <button type="button" className="btn btn-secondary btn-sm">
               Interested
             </button>
           </div>
