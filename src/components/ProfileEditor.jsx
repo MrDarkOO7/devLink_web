@@ -133,7 +133,6 @@ const ProfileEditor = ({ initialUser }) => {
       return;
     }
 
-    // Build payload - only changed fields
     const payload = {};
     const allowed = [
       "firstName",
@@ -178,10 +177,8 @@ const ProfileEditor = ({ initialUser }) => {
       setMessage(res?.data?.message || "Profile updated");
       setTimeout(() => setMessage(null), 4000);
 
-      // dispatch updated user to redux
       dispatch(addUser(updatedUser));
 
-      // update local form and stop editing
       setForm((s) => ({
         ...s,
         ...Object.fromEntries(Object.entries(payload)),
@@ -207,7 +204,6 @@ const ProfileEditor = ({ initialUser }) => {
     <div className="max-w-3xl mx-auto p-6">
       <div className="card bg-base-100 shadow-lg rounded-xl overflow-hidden">
         <div className="md:flex">
-          {/* Avatar */}
           <div className="md:w-1/3 bg-base-200 flex items-center justify-center p-6">
             <div className="w-36 h-36 rounded-full overflow-hidden ring-2">
               <img
@@ -275,9 +271,6 @@ const ProfileEditor = ({ initialUser }) => {
                     </div>
                   </div>
                 ) : null}
-                {/* <div className="text-sm text-base-content/60">
-                      No skills listed
-                    </div> */}
 
                 <div className="mt-4 text-sm text-base-content/60 flex gap-4">
                   {initialUser?.age ? <div>{initialUser.age} yrs</div> : null}
@@ -294,7 +287,6 @@ const ProfileEditor = ({ initialUser }) => {
                 )}
               </>
             ) : (
-              /* EDIT FORM */
               <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>

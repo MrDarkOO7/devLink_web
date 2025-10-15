@@ -1,7 +1,6 @@
-// src/components/Login.jsx
 import React, { useState } from "react";
 import api from "../utils/api";
-import { useNavigate } from "react-router-dom"; // optional, safe to keep if you use react-router
+import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addUser } from "../redux/userSlice";
 
@@ -20,7 +19,6 @@ const Login = () => {
   const validate = () => {
     setError(null);
     if (!email) return "Please enter your email.";
-    // simple email regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) return "Please enter a valid email address.";
     if (!password) return "Please enter your password.";
@@ -53,7 +51,6 @@ const Login = () => {
 
       setMessage(msg);
       dispatch(addUser(user));
-      // Redirect if using react-router
       if (navigate) {
         navigate("/");
       }
@@ -80,7 +77,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-base-200 ">
+    <div className="min-h-screen w-full flex items-center justify-center bg-base-200 px-4 py-8">
       <form
         onSubmit={handleSubmit}
         className="card w-full max-w-md bg-base-100 shadow-2xl border border-base-300"
@@ -91,7 +88,6 @@ const Login = () => {
             Welcome Back 👋
           </h2>
 
-          {/* Email */}
           <fieldset className="form-control flex flex-col gap-1">
             <label className="label">
               <span className="label-text font-medium">Email</span>
@@ -112,7 +108,6 @@ const Login = () => {
             />
           </fieldset>
 
-          {/* Password */}
           <fieldset className="form-control flex flex-col gap-1">
             <label className="label">
               <span className="label-text font-medium">Password</span>
@@ -189,7 +184,6 @@ const Login = () => {
             </label>
           </fieldset>
 
-          {/* Error / Success */}
           {error && (
             <div className="text-sm text-error bg-error/10 p-2 rounded">
               {error}
@@ -201,7 +195,6 @@ const Login = () => {
             </div>
           )}
 
-          {/* Submit */}
           <div className="card-actions mt-2">
             <button
               type="submit"

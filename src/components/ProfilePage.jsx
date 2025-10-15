@@ -29,7 +29,6 @@ const ProfilePage = () => {
     const signal = controller.signal;
 
     const fetchProfile = async () => {
-      // If no id -> own profile. Ensure logged in.
       if (!id) {
         if (!currentUser) {
           navigate("/login", { replace: true });
@@ -39,7 +38,6 @@ const ProfilePage = () => {
         return;
       }
 
-      // If id matches currentUser -> reuse
       if (
         currentUser &&
         (String(currentUser._id) === String(id) ||
@@ -49,7 +47,6 @@ const ProfilePage = () => {
         return;
       }
 
-      // Fetch public profile by id
       setLoading(true);
       setError(null);
       try {

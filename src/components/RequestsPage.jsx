@@ -1,20 +1,9 @@
 import React, { useEffect, useState } from "react";
-import api from "../utils/api"; // must have withCredentials: true
+import api from "../utils/api";
 import RequestCard from "./RequesrCard";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeUser } from "../redux/userSlice";
-
-/**
- * RequestsPage
- * - GET /requests/received -> connectionRequests (array)
- * - POST /review/:status/:requestId -> accept/reject
- *
- * Behavior:
- * - Fetch list on mount (abortable)
- * - On accept/reject: optimistic remove, call API, show toast/error fallback
- * - Shows loading / error / empty states
- */
 
 const RequestsPage = () => {
   const dispatch = useDispatch();
@@ -46,9 +35,7 @@ const RequestsPage = () => {
     fetchRequests();
   }, []);
 
-  // onAction called from RequestCard; returns a promise
   const handleAction = async (status, requestId) => {
-    // optimistic UI: remove the request immediately
     const prev = requests;
     const updated = prev.filter((r) => String(r._id) !== String(requestId));
     setRequests(updated);
@@ -94,9 +81,7 @@ const RequestsPage = () => {
               onAction={async (status, requestId) => {
                 try {
                   await handleAction(status, requestId);
-                  // Optionally show a short success message (toast)
                 } catch (err) {
-                  // show inline error (simple alert for now)
                   alert(err.message || "Action failed");
                 }
               }}

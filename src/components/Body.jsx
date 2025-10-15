@@ -7,7 +7,7 @@ const Body = () => {
   return (
     <div className="min-h-screen flex flex-col bg-base-200">
       <Navbar />
-      <main className="flex-grow">
+      <main className="flex-grow min-h-[calc(100vh-8rem)]">
         <Outlet />
       </main>
       <Footer />

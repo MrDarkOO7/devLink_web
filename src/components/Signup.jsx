@@ -1,4 +1,3 @@
-// src/components/Signup.jsx
 import React, { useState } from "react";
 import api from "../utils/api";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +19,6 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // simple email regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleChange = (e) => {
@@ -66,7 +64,6 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      // signup endpoint: POST /signup
       const payload = {
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
@@ -76,12 +73,10 @@ const Signup = () => {
 
       const res = await api.post("/auth/signup", payload);
 
-      // server returns { message: "User signed up successfully" }
       const successMsg =
         (res && res.data && res.data.message) || "Signed up successfully.";
       setMessage(successMsg);
 
-      // Optionally clear form
       setForm({
         firstName: "",
         lastName: "",
@@ -90,15 +85,9 @@ const Signup = () => {
         confirmPassword: "",
       });
       setFieldErrors({});
-
-      // Redirect to login after 1s so user sees message (optional)
-      // if (navigate) {
-      //   setTimeout(() => navigate("/login"), 1000);
-      // }
     } catch (err) {
       console.error("Signup error:", err);
 
-      // Prefer server message if present
       const serverMsg =
         typeof err?.response?.data === "string"
           ? err.response.data
@@ -106,9 +95,7 @@ const Signup = () => {
             err?.response?.data?.error ||
             (err?.response?.data && JSON.stringify(err.response.data));
 
-      // If validation-like errors are returned as an object (e.g., { field: '...' })
       if (err?.response?.data && typeof err.response.data === "object") {
-        // Try to map field errors
         const maybeFieldErrors = {};
         for (const k of ["firstName", "lastName", "emailId", "password"]) {
           if (err.response.data[k]) maybeFieldErrors[k] = err.response.data[k];
@@ -139,7 +126,6 @@ const Signup = () => {
             Create account
           </h2>
 
-          {/* first + last name row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="form-control">
               <label className="label">
@@ -190,7 +176,6 @@ const Signup = () => {
             </div>
           </div>
 
-          {/* email */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Email</span>
@@ -214,7 +199,6 @@ const Signup = () => {
             )}
           </div>
 
-          {/* password */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Password</span>
@@ -241,7 +225,6 @@ const Signup = () => {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/70 hover:text-base-content transition-colors"
               >
                 {showPassword ? (
-                  // eye-off
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -262,7 +245,6 @@ const Signup = () => {
                     />
                   </svg>
                 ) : (
-                  // eye
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -295,7 +277,6 @@ const Signup = () => {
             </p>
           </div>
 
-          {/* confirm */}
           <div className="form-control">
             <label className="label">
               <span className="label-text">Confirm password</span>
@@ -321,7 +302,6 @@ const Signup = () => {
             )}
           </div>
 
-          {/* general error / success */}
           {generalError && (
             <div className="text-sm text-error bg-error/10 p-2 rounded">
               {generalError}
@@ -333,7 +313,6 @@ const Signup = () => {
             </div>
           )}
 
-          {/* submit */}
           <div className="card-actions">
             <button
               type="submit"
