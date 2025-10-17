@@ -12,8 +12,8 @@ const ConnectionCard = ({ user }) => {
 
   return (
     <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow rounded-lg w-full">
-      <div className="card-body flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 w-full">
+      <div className="card-body flex flex-col sm:flex-row sm:items-center gap-4 flex-wrap">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 w-full sm:w-auto flex-shrink">
           <div className="flex justify-center sm:justify-start">
             <div className="avatar">
               <div className="w-16 h-16 rounded-full overflow-hidden ring-1 ring-base-200">
@@ -38,7 +38,7 @@ const ConnectionCard = ({ user }) => {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto flex-shrink-0">
           <button
             type="button"
             className="btn btn-sm btn-outline btn-primary w-full sm:w-auto"
