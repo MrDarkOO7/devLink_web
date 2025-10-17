@@ -59,8 +59,8 @@ const Feed = () => {
   }, []);
 
   return (
-    <div className="flex justify-center items-center w-full h-full min-h-[80vh]">
-      <div className="w-full max-w-5xl px-4">
+    <div className="flex justify-center w-full h-full min-h-[80vh]">
+      <div className="w-full h-full max-w-5xl px-4">
         <h1 className="text-2xl font-semibold text-center mb-6">
           Discover developers
         </h1>
@@ -72,7 +72,7 @@ const Feed = () => {
 
         {error && <div className="text-sm text-error">{error}</div>}
 
-        {Array.isArray(feedData) && feedData.length === 0 && (
+        {Array.isArray(feedData) && feedData.length === 0 && !error && (
           <div className="py-6 text-muted">No suggestions right now.</div>
         )}
 

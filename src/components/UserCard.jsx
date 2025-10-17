@@ -18,7 +18,7 @@ const UserCard = ({ user, onAction }) => {
       : defaultProfile.male);
 
   return (
-    <div className="card mx-auto bg-base-200 shadow-xl max-w-md h-[600px] rounded-xl overflow-hidden">
+    <div className="card mx-auto bg-base-200 shadow-xl max-w-md h-[600px] rounded-xl overflow-hidden mb-12">
       <figure className="h-[60%] w-full">
         <img
           src={displayAvatar}
