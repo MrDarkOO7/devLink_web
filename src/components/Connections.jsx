@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
 import ConnectionCard from "./ConnectionCard";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeUser } from "../redux/userSlice";
+import { addConnections } from "../redux/connectionsSlice";
 
 const Connections = () => {
   const dispatch = useDispatch();
+  const connections = useSelector((store) => store.connections);
   const navigate = useNavigate();
-  const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -20,7 +21,7 @@ const Connections = () => {
       try {
         const res = await api.get("/user/connections");
         const formatted = res?.data?.formattedConnections || [];
-        setConnections(formatted);
+        dispatch(addConnections(formatted));
       } catch (err) {
         if (err.status === 401) {
           dispatch(removeUser());

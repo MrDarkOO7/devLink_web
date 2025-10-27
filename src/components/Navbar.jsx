@@ -11,6 +11,7 @@ import {
   FaHandshake,
   FaUser,
 } from "react-icons/fa";
+import { clearConnections } from "../redux/connectionsSlice";
 
 const PUBLIC_PATHS = ["/login", "/signup", "/forgot", "/reset-password"];
 
@@ -35,6 +36,7 @@ const Navbar = () => {
       if (logout.status === 200) {
         dispatch(removeUser());
         dispatch(removeFeed());
+        dispatch(clearConnections());
         navigate("/login");
       }
     } catch (err) {

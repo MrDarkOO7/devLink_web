@@ -1,14 +1,19 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
-const DEFAULT_AVATAR = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+import { defaultProfile } from "../utils/environment";
 
 const ConnectionCard = ({ user }) => {
   const navigate = useNavigate();
-  const { _id, firstName, lastName, photoUrl, bio } = user || {};
+  const { _id, firstName, lastName, photoUrl, bio, gender } = user || {};
 
   const displayName =
     `${firstName || ""} ${lastName || ""}`.trim() || "Unnamed";
+
+  const profilePhoto = photoUrl
+    ? photoUrl
+    : gender === "female"
+    ? defaultProfile.female
+    : defaultProfile.male;
 
   return (
     <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow rounded-lg w-full">
@@ -18,7 +23,7 @@ const ConnectionCard = ({ user }) => {
             <div className="avatar">
               <div className="w-16 h-16 rounded-full overflow-hidden ring-1 ring-base-200">
                 <img
-                  src={photoUrl || DEFAULT_AVATAR}
+                  src={profilePhoto}
                   alt={`${displayName} avatar`}
                   className="object-cover w-full h-full"
                 />
@@ -47,7 +52,13 @@ const ConnectionCard = ({ user }) => {
             View Profile
           </button>
 
-          <button className="btn btn-sm btn-outline btn-secondary w-full sm:w-auto">
+          <button
+            className="btn btn-sm btn-outline btn-secondary w-full sm:w-auto"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/chat/${_id}`);
+            }}
+          >
             Message
           </button>
         </div>

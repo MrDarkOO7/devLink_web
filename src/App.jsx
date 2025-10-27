@@ -8,6 +8,7 @@ import Signup from "./components/Signup";
 import Connections from "./components/Connections";
 import ProfilePage from "./components/ProfilePage";
 import RequestsPage from "./components/RequestsPage";
+import ChatPage from "./components/chat/ChatPage";
 
 function App() {
   return (
@@ -23,6 +24,8 @@ function App() {
               <Route path="/profile/:id" element={<ProfilePage />} />
               <Route path="/connections" element={<Connections />} />
               <Route path="/requests" element={<RequestsPage />} />
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="chat/:id" element={<ChatPage />} />
             </Route>
           </Routes>
         </BrowserRouter>
