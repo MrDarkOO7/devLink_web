@@ -33,24 +33,17 @@ const ChatWindow = () => {
   useEffect(() => {
     if (!userId || !targetUserId) return;
 
+    fetchChat(targetUserId);
+
     const socket = createSocketConnection();
     socket.emit("joinChat", { userId, targetUserId });
 
     socket.on("messageReceived", ({ fromUser, text }) => {
-      let fromMe;
-      if (fromUser === userId) {
-        fromMe = true;
-      }
+      const fromMe = fromUser === userId;
       setMessages((prev) => [
         ...prev,
-        {
-          id: Date.now().toString(),
-          fromMe,
-          text,
-          ts: new Date().toISOString(),
-        },
+        { id: `${Date.now()}`, fromMe, text, ts: new Date().toISOString() },
       ]);
-      console.log("messageReceived", { userId, text });
     });
 
     return () => {
@@ -68,13 +61,36 @@ const ChatWindow = () => {
       setTargetUserData(data);
     } catch (err) {
       console.error(err);
-      if (err.status === 401) {
+      if (err?.response?.status === 401) {
         dispatch(removeUser());
         navigate("/login");
-      }
-      if (err?.response?.status === 404) {
+      } else if (err?.response?.status === 404) {
         setError("User not found.");
+      } else {
+        setError("Failed to load profile.");
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchChat = async (targetUserId) => {
+    setLoading(true);
+    try {
+      const res = await api.get(`/chat/${targetUserId}`, {
+        withCredentials: true,
+      });
+      const msgs = res?.data?.data?.messages || [];
+      const formatted = msgs.map((msg) => ({
+        id: msg._id?.toString(),
+        fromMe: msg.senderId === userId,
+        text: msg.text,
+        ts: msg.createdAt,
+      }));
+      setMessages(formatted);
+    } catch (err) {
+      console.error("error fetching chat: ", err);
+      setError("Failed to load conversation.");
     } finally {
       setLoading(false);
     }
@@ -82,89 +98,83 @@ const ChatWindow = () => {
 
   useEffect(() => {
     if (!targetUserId) return;
-
     fetchTargetUser(targetUserId);
   }, [targetUserId]);
 
   useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTop = listRef.current.scrollHeight;
-    }
-  }, [messages]);
+    const el = listRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    });
+  }, [messages, targetUserId]);
 
-  const profilePhoto = targetuserData?.photoUrl
-    ? targetuserData?.photoUrl
-    : targetuserData?.gender === "female"
-    ? defaultProfile.female
-    : defaultProfile.male;
-
-  // if (!conversation) {
-  //   return (
-  //     <div className="h-full flex items-center justify-center border border-base-200 rounded-xl p-6">
-  //       <div className="text-center">
-  //         <div className="text-lg font-semibold">Select a conversation</div>
-  //         <div className="text-sm text-base-content/60 mt-2">
-  //           Start by selecting a user from the left.
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  const profilePhoto =
+    targetuserData?.photoUrl ||
+    (targetuserData?.gender === "female"
+      ? defaultProfile.female
+      : defaultProfile.male);
 
   return (
-    <div className="flex flex-col h-full border border-base-200 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 flex items-center justify-between border-b border-base-200">
-        <div className="flex items-center gap-3">
-          {/* <button
-            className="md:hidden btn btn-ghost btn-square btn-sm"
-            onClick={onOpenSidebar}
-            aria-label="Open conversations"
-          >
-            ☰
-          </button> */}
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-base-200">
+    <div className="flex flex-col h-[80vh] max-h-[80vh] bg-base-100 rounded-xl shadow-md border border-base-200 overflow-hidden">
+      <header className="flex items-center justify-between gap-4 px-4 py-3 bg-base-200/70 border-b border-base-300 backdrop-blur-sm">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-base-200 flex-shrink-0">
             <img
-              src={profilePhoto}
-              alt={targetuserData?.firstName}
+              src={
+                profilePhoto ||
+                "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+              }
+              alt={targetuserData?.firstName || "User"}
               className="w-full h-full object-cover"
             />
           </div>
-          <div>
-            <div className="text-sm font-medium">
-              {targetuserData?.firstName + " " + targetuserData?.lastName}
+          <div className="min-w-0">
+            <div className="text-sm font-semibold truncate">
+              {targetuserData
+                ? `${targetuserData.firstName || ""} ${
+                    targetuserData.lastName || ""
+                  }`
+                : "Loading..."}
             </div>
-            <div className="text-xs text-base-content/60">Active now</div>
+            <div className="text-xs text-success font-medium">● Active now</div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            className="btn btn-sm btn-outline btn-primary w-full sm:w-auto"
-            onClick={() => navigate(`/profile/${targetUserId}`)}
-          >
-            View Profile
-          </button>
-        </div>
-      </div>
+        <button
+          className="btn btn-xs sm:btn-sm btn-outline"
+          onClick={() => navigate(`/profile/${targetUserId}`)}
+        >
+          View Profile
+        </button>
+      </header>
 
-      <div
+      <main
         ref={listRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 bg-base-100"
+        className="flex-1 overflow-y-auto px-4 py-3 space-y-4 bg-base-100 scroll-smooth"
+        role="log"
+        aria-live="polite"
       >
-        {messages.length === 0 && (
+        {loading ? (
+          <div className="text-center text-sm text-base-content/60 mt-12">
+            Loading conversation...
+          </div>
+        ) : error ? (
+          <div className="text-center text-sm text-error mt-6">{error}</div>
+        ) : messages.length === 0 ? (
           <div className="text-center text-sm text-base-content/60 mt-12">
             No messages yet. Say hi!
           </div>
+        ) : (
+          messages.map((m) => (
+            <MessageBubble key={m.id} message={{ ...m, avatar: profilePhoto }} />
+          ))
         )}
+      </main>
 
-        {messages.map((m) => (
-          <MessageBubble key={m.id} message={m} />
-        ))}
-      </div>
-
-      <div className="px-4 py-3 border-t border-base-200 bg-base-100">
+      <footer className="bg-base-200/80  rounded-b-xl px-4 py-3 shadow-inner backdrop-blur-sm">
         <ChatComposer onSend={handleSendMessage} />
-      </div>
+      </footer>
     </div>
   );
 };
